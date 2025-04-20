@@ -170,13 +170,13 @@ export function TopMenu(props: TopMenuProps) {
             }}
             passHref
           >
-            <Button className="bg-cornflower-500 rounded-xl text-white dark:bg-cornflower-400 text p-2 px-4 normal-case">
+            <Button className="bg-cornflower-500 rounded-xl text-white dark:bg-cornflower-400 text p-2 px-4 normal-case whitespace-nowrap">
               Professor Match
             </Button>
           </Link>
 
 
-          <Button className="bg-cornflower-500 rounded-xl text-white dark:bg-cornflower-400 text p-2 px-4 normal-case">
+          <Button className="bg-cornflower-500 rounded-xl text-white dark:bg-cornflower-400 text p-2 px-4 normal-case whitespace-nowrap">
             <BookIcon className="mr-2" />
             {props.isPlanner ? 'Search Results' : 'My Planner'}
           </Button>
