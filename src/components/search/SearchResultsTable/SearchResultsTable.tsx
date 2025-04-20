@@ -37,6 +37,7 @@ import {
   sectionCanOverlap,
 } from '@/types/SearchQuery';
 import type { SectionsType } from '@/types/SectionsType';
+import PlannerButton from '@/components/professor-match/PlannerButton/PlannerButton';
 
 function LoadingRow() {
   const nameCell = (
