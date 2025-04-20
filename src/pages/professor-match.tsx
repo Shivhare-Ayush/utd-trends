@@ -1,61 +1,73 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import CustomNavbar from '../components/CustomNavbar';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 const ProfessorMatch: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [professors, setProfessors] = useState<any[]>([]);
 
-  const professors = [
-    {
-      id: 1,
-      name: "Jason Smith",
-      subject: "Computer Science",
-      email: "smith@utdallas.edu",
-      office: "ECSW 2.150",
-      officeLink: "https://utdallas.edu/maps",
-      profileLink: "https://profiles.utdallas.edu/smith",
-      imageSrc: "/default.jpg",
-      accent: "American",
-      accentConfidence: 96,
-      grade: "A",
-      rmp: "4.2",
-    },
-    {
-      id: 2,
-      name: "Professor Johnson",
-      subject: "Mathematics",
-      email: "johnson@utdallas.edu",
-      office: "FO 3.210",
-      officeLink: "https://utdallas.edu/maps",
-      profileLink: "https://profiles.utdallas.edu/johnson",
-      imageSrc: "/default.jpg",
-      accent: "British",
-      accentConfidence: 88,
-      grade: "B+",
-      rmp: "3.9",
-    }
-  ];
+  useEffect(() => {
+    const fetchProfessorDetails = async () => {
+      if (!router.query.professors) return;
+
+      try {
+        const decoded = decodeURIComponent(router.query.professors as string);
+        const parsed = JSON.parse(decoded);
+
+        const enriched = await Promise.all(
+          parsed.map(async (prof: any) => {
+            try {
+              const res = await fetch(
+                `/api/professor?profFirst=${encodeURIComponent(prof.name.split(' ')[0])}&profLast=${encodeURIComponent(prof.name.split(' ').slice(1).join(' '))}`
+              );
+              const profData = await res.json();
+              const profDetails = profData?.data ?? {};
+
+              return {
+                ...prof,
+                email: profDetails.email || '',
+                office: profDetails.office?.building && profDetails.office?.room
+                  ? `${profDetails.office.building} ${profDetails.office.room}`
+                  : '',
+                officeLink: profDetails.office?.map_uri || '',
+                profileLink: profDetails.profile_uri || '',
+                imageSrc: profDetails.image_uri || '/default.jpg',
+              };
+            } catch (error) {
+              console.error('Error enriching professor:', error);
+              return prof;
+            }
+          })
+        );
+
+        setProfessors(enriched);
+      } catch (error) {
+        console.error('Failed to parse professor data from query:', error);
+      }
+    };
+
+    fetchProfessorDetails();
+  }, [router.query.professors]);
 
   return (
     <div
       className="h-screen w-screen overflow-hidden bg-cover bg-center bg-no-repeat flex flex-col items-center"
       style={{ backgroundImage: "url('/noisyBG.svg')" }}
     >
-      {/* Nav on top */}
       <div className="w-full px-4 pt-1/4">
         <CustomNavbar />
       </div>
 
-      {/* Frosted panel */}
       <div className="mt-4 w-2/5 h-[80vh] rounded-3xl p-6 shadow-lg backdrop-blur-md bg-transparent border-[3px] border-black/20 shadow-[0_4px_4px_rgba(0,0,0,0.25)] flex flex-col">
-        {/* Scrollable card list */}
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto snap-y snap-mandatory space-y-20 px-10 py-10 scrollbar-hide"
         >
-          {professors.map((professor) => (
+          {professors.map((professor, index) => (
             <div
-              key={professor.id}
+              key={index}
               className="h-[500px] snap-start w-full max-w-md mx-auto bg-white/10 rounded-3xl border border-black/20 backdrop-blur-md shadow-md px-6 py-10 flex flex-col items-center text-center space-y-2"
               style={{ height: 'calc(100vh - 200px)' }}
             >
@@ -66,7 +78,7 @@ const ProfessorMatch: React.FC = () => {
 
               {/* Image */}
               <Image
-                src={professor.imageSrc}
+                src={professor.imageSrc || '/default.jpg'}
                 alt={professor.name}
                 width={200}
                 height={200}
@@ -83,18 +95,18 @@ const ProfessorMatch: React.FC = () => {
                 </p>
                 <a href={professor.profileLink} className="text-xs underline">Faculty Profile</a>
                 <p className="text-sm mt-2">
-                  <span className="font-semibold">Accent:</span> {professor.accent} ({professor.accentConfidence}%)
+                  <span className="font-semibold">Accent:</span> {professor.accent ?? 'Unknown'} ({professor.accentConfidence ?? 0}%)
                 </p>
               </div>
 
               {/* Ratings row */}
               <div className="flex justify-center gap-6 mb-2">
                 <div className="bg-green-400 text-black font-bold px-4 py-2 rounded-full shadow-sm border border-black text-sm">
-                  {professor.grade}
+                  {professor.grade ?? 'N/A'}
                   <p className="text-xs font-normal mt-0.5">Grade</p>
                 </div>
                 <div className="bg-orange-300 text-black font-bold px-4 py-2 rounded-full shadow-sm border border-black text-sm">
-                  {professor.rmp}
+                  {professor.rmp ?? 'N/A'}
                   <p className="text-xs font-normal mt-0.5">RMP</p>
                 </div>
               </div>

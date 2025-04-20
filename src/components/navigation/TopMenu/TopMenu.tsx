@@ -11,6 +11,11 @@ import Background from '@/../public/background.png';
 import WhatsNew from '@/components/common/WhatsNew/WhatsNew';
 import Tutorial from '@/components/dashboard/Tutorial/Tutorial';
 import SearchBar from '@/components/search/SearchBar/SearchBar';
+import type { SearchQuery } from '@/types/SearchQuery';
+import type { GenericFetchedData } from '@/types/GenericFetchedData'; // Adjust the path as needed
+import type { RMPInterface } from '@/pages/api/ratemyprofessorScraper'; // Adjust the path as needed
+import type { GradesType } from '@/types/GradesType'; // Adjust the path as needed
+import { searchQueryLabel } from '@/types/SearchQuery';
 
 /**
  * Props type used by the TopMenu component
@@ -18,6 +23,8 @@ import SearchBar from '@/components/search/SearchBar/SearchBar';
 type DashboardTopMenuProps = {
   resultsLoading: 'loading' | 'done' | 'error';
   setResultsLoading: () => void;
+  includedResults: SearchQuery[];
+  rmp: { [key: string]: GenericFetchedData<RMPInterface> };
   isPlanner: false;
 };
 type PlannerTopMenuProps = {
@@ -129,11 +136,53 @@ export function TopMenu(props: TopMenuProps) {
           }
           className="ml-auto rounded-xl"
         >
+        <div className="flex gap-60 items-center ml-auto">
+          <Link
+            href={{
+              pathname: '/professor-match',
+              query: {
+                professors: encodeURIComponent(JSON.stringify(
+                  'includedResults' in props &&
+                  props.includedResults
+                    .filter((r) => r.profFirst && r.profLast)
+                    .map((r) => {
+                      const key = `${r.profFirst} ${r.profLast}`;
+                      const ratingData = props.rmp[key]?.state === 'done' ? props.rmp[key].data : null;
+
+                      return {
+                        id: key,
+                        name: key,
+                        lastName: r.profLast,
+                        subject: r.prefix + ' ' + r.number,
+                        email: '',
+                        office: '',
+                        officeLink: '',
+                        profileLink: '',
+                        imageSrc: '/default.jpg',
+                        accent: 'Unknown',
+                        accentConfidence: 0,
+                        grade: 'N/A',
+                        rmp: ratingData?.avgRating?.toString() ?? 'N/A',
+                      };
+                    })
+                )),
+              },
+            }}
+            passHref
+          >
+            <Button className="bg-cornflower-500 rounded-xl text-white dark:bg-cornflower-400 text p-2 px-4 normal-case">
+              Professor Match
+            </Button>
+          </Link>
+
+
           <Button className="bg-cornflower-500 rounded-xl text-white dark:bg-cornflower-400 text p-2 px-4 normal-case">
             <BookIcon className="mr-2" />
             {props.isPlanner ? 'Search Results' : 'My Planner'}
           </Button>
+        </div>
         </Link>
+      
         <div className="flex gap-0 md:gap-4">
           <div className="ml-auto">
             <WhatsNew />

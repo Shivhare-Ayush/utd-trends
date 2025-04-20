@@ -9,7 +9,6 @@ import type { RMPInterface } from '@/pages/api/ratemyprofessorScraper';
 import type { GenericFetchedData } from '@/types/GenericFetchedData';
 import type { GradesType } from '@/types/GradesType';
 import { type SearchQuery, searchQueryLabel } from '@/types/SearchQuery';
-import TopMenu from '@/components/navigation/TopMenu/TopMenu';
 
 const fallbackSrc = 'https://profiles.utdallas.edu/img/default.png';
 
