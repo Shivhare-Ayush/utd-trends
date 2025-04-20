@@ -533,6 +533,8 @@ export const Dashboard: NextPage<Props> = (props: Props): React.ReactNode => {
     useGradeStore();
   //Saved data for their professors
   const [compareRmp, setCompareRmp] = useRmpStore();
+  const [professorMatchData, setProfessorMatchData] = useState<any[]>([]);
+
 
   //Add a course+prof combo to compare (happens from search results)
   //copy over data basically
@@ -740,7 +742,10 @@ export const Dashboard: NextPage<Props> = (props: Props): React.ReactNode => {
           resultsLoading={results.state}
           setResultsLoading={() => setResults({ state: 'loading' })}
           isPlanner={false}
-        />
+          includedResults={includedResults}
+       
+          rmp={props.rmp}
+          />
         <main className="p-4">{contentComponent}</main>
       </div>
     </>

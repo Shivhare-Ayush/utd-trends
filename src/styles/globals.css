@@ -19,6 +19,13 @@ body,
 .apexcharts-toolbar {
   z-index: 0 !important;
 }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
 
 @layer utilities {
   .bg-lighten {
@@ -35,5 +42,13 @@ body,
   }
   .tutorial-table {
     background-color: var(--mui-palette-background-paper);
+  }
+  .bg-clipped {
+    background-image: url('/CleanBG.svg');
+    background-size: cover; /* Adjust size as needed (e.g., 'contain', 'auto') */
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 1.5rem; /* Match the Tailwind 'rounded-3xl' */
+    overflow: auto; /* Ensures anything overflowing the shape is clipped */
   }
 }
