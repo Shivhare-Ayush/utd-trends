@@ -43,4 +43,12 @@ body,
   .tutorial-table {
     background-color: var(--mui-palette-background-paper);
   }
+  .bg-clipped {
+    background-image: url('/CleanBG.svg');
+    background-size: cover; /* Adjust size as needed (e.g., 'contain', 'auto') */
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 1.5rem; /* Match the Tailwind 'rounded-3xl' */
+    overflow: auto; /* Ensures anything overflowing the shape is clipped */
+  }
 }

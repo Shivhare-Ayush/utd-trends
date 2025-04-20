@@ -9,8 +9,7 @@ const CustomNavbar: React.FC = () => {
   const router = useRouter();
 
   return (
-    <div>
-      <div className="w-full px-6 py-4 flex items-center justify-between rounded-xl border border-black bg-white/70 shadow-md backdrop-blur-sm max-w-3xl mx-auto mt-4">
+      <div className="w-full px-6 py-4 flex items-center justify-between rounded-xl border-2 border-black bg-white/70 border-b-4 backdrop-blur-sm max-w-3xl">
         
         {/* Left: Logo */}
         <div className="flex items-center min-w-[100px]">
@@ -57,7 +56,6 @@ const CustomNavbar: React.FC = () => {
           </Link>
         </div>
       </div>
-    </div>
   );
 };
 

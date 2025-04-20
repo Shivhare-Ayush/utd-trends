@@ -1,8 +1,32 @@
 import React, { useRef } from 'react';
 import CustomNavbar from '../components/CustomNavbar';
 import Image from 'next/image';
+import Checkbox from '@mui/material/Checkbox';
+import BookIcon from '@mui/icons-material/Book';
+import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
+import { useRouter } from 'next/router';
+import type { GenericFetchedData } from '../types/GenericFetchedData';
+import type { SectionsType } from '../types/SectionsType';
+import type { RMPInterface } from './api/ratemyprofessorScraper';
+import type { GradesType } from '../types/GradesType';
 
-const ProfessorMatch: React.FC = () => {
+
+
+
+type ProfessorMatchProps = { 
+  addToPlanner: (course: any) => void;
+  sections: { [key: string]: GenericFetchedData<SectionsType> };
+  grades: { [key: string]: GenericFetchedData<GradesType> };
+  rmp: { [key: string]: GenericFetchedData<RMPInterface> };
+  
+};
+
+const ProfessorMatch = ({
+  sections,
+  grades,
+  rmp,
+  addToPlanner,
+}: ProfessorMatchProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const professors = [
@@ -14,7 +38,7 @@ const ProfessorMatch: React.FC = () => {
       office: "ECSW 2.150",
       officeLink: "https://utdallas.edu/maps",
       profileLink: "https://profiles.utdallas.edu/smith",
-      imageSrc: "/default.jpg",
+      imageSrc: "/John_Cole.webp",
       accent: "American",
       accentConfidence: 96,
       grade: "A",
@@ -38,48 +62,55 @@ const ProfessorMatch: React.FC = () => {
 
   return (
     <div
-      className="h-screen w-screen overflow-hidden bg-cover bg-center bg-no-repeat flex flex-col items-center"
+      className="h-screen w-screen bg-cover bg-center flex flex-col items-center justify-center p-7 pb-0 overflow-hidden"
       style={{ backgroundImage: "url('/noisyBG.svg')" }}
     >
       {/* Nav on top */}
-      <div className="w-full px-4 pt-1/4">
-        <CustomNavbar />
-      </div>
-
-      {/* Frosted panel */}
-      <div className="mt-4 w-2/5 h-[80vh] rounded-3xl p-6 shadow-lg backdrop-blur-md bg-transparent border-[3px] border-black/20 shadow-[0_4px_4px_rgba(0,0,0,0.25)] flex flex-col">
-        {/* Scrollable card list */}
+      <CustomNavbar />
+      {/* Main content area */}
+      <div className="mt-4 w-2/5 h-screen rounded-3xl p-6 border-2 border-black/20 flex flex-col justify-center bg-clipped">        {/* Scrollable card list */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto snap-y snap-mandatory space-y-20 px-10 py-10 scrollbar-hide"
-        >
+          className="flex-1 overflow-y-auto snap-y snap-mandatory space-y-20 scrollbar-hide flex flex-col items-center"
+          >
           {professors.map((professor) => (
+            // Professor card 
             <div
               key={professor.id}
-              className="h-[500px] snap-start w-full max-w-md mx-auto bg-white/10 rounded-3xl border border-black/20 backdrop-blur-md shadow-md px-6 py-10 flex flex-col items-center text-center space-y-2"
+              className="h-[500px] snap-start w-full max-w-md bg-white/10 rounded-3xl border-2 border-black/20 px-6 py-10 flex flex-col items-center text-center space-y-2"
               style={{ height: 'calc(100vh - 200px)' }}
             >
-              {/* Bookmark icon */}
-              <div className="absolute top-4 right-4">
-                <div className="bg-indigo-500 w-6 h-8 rounded-sm" />
+              <div className=" justify-between flex w-full mb-4">
+              <button className="bg-red-500 rounded-sm w-6 h-8"/>
+                <Image
+                  src={professor.imageSrc}
+                  alt={professor.name}
+                  width={200}
+                  height={200}
+                  className="rounded-2xl object-cover border-b-4 border-black border-2"
+                />
+                {/* Bookmark icon */}
+                <span>
+                <Checkbox          
+                  checked={false}
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevents opening/closing the card when clicking on the compare checkbox
+                    addToPlanner(professor);
+                    }
+                  }
+                  icon={<BookOutlinedIcon />}
+                  checkedIcon={<BookIcon />}
+                />
+              </span>
               </div>
 
-              {/* Image */}
-              <Image
-                src={professor.imageSrc}
-                alt={professor.name}
-                width={200}
-                height={200}
-                className="rounded-2xl object-cover shadow-md mt-6"
-              />
-
               {/* Info block */}
-              <div className="flex flex-col items-center space-y-1">
+              <div className="flex flex-col items-center text-black font-inter-thin">
                 <p className="text-xl font-bold">{professor.name}</p>
-                <p className="text-sm text-gray-700">{professor.subject}</p>
-                <a href={`mailto:${professor.email}`} className="text-xs text-blue-700 underline">{professor.email}</a>
+                <p className=" text-gray-700">{professor.subject}</p>
+                <a href={`mailto:${professor.email}`} className="text-xs underline">{professor.email}</a>
                 <p className="text-xs">
-                  Office: <a href={professor.officeLink} className="underline">{professor.office}</a>
+                  Office: <a href={professor.officeLink} className="underline ">{professor.office}</a>
                 </p>
                 <a href={professor.profileLink} className="text-xs underline">Faculty Profile</a>
                 <p className="text-sm mt-2">
@@ -88,14 +119,19 @@ const ProfessorMatch: React.FC = () => {
               </div>
 
               {/* Ratings row */}
-              <div className="flex justify-center gap-6 mb-2">
-                <div className="bg-green-400 text-black font-bold px-4 py-2 rounded-full shadow-sm border border-black text-sm">
+              <div className="flex justify-center gap-10 mb-2 ">
+                <div className='flex flex-col items-center'>
+                  <div className="bg-[#8FEC5D] text-black font-bold px-4 py-2 w-20 rounded-full shadow-sm border border-black border-b-2 text-sm">
                   {professor.grade}
-                  <p className="text-xs font-normal mt-0.5">Grade</p>
+                  </div>
+                  <p className="text-xs font-inter mt-0.5">Grade</p>
                 </div>
-                <div className="bg-orange-300 text-black font-bold px-4 py-2 rounded-full shadow-sm border border-black text-sm">
+                
+                <div className='flex flex-col items-center'>
+                  <div className="bg-[#FFB74D] text-black font-bold px-4 py-2 w-20 rounded-full shadow-sm border border-black border-b-2 text-sm">
                   {professor.rmp}
-                  <p className="text-xs font-normal mt-0.5">RMP</p>
+                  </div>
+                  <p className="text-xs font-inter mt-0.5">RMP</p>
                 </div>
               </div>
             </div>
