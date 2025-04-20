@@ -172,7 +172,7 @@ const ProfessorMatch: React.FC = () => {
 
   const addToPlanner = (professor: any) => {
     // Logic to add the professor to the planner
-    console.log(`${professor.name} added to planner`);
+    alert(`${professor.subject} with ${professor.name} has been added to your planner.`);
     // You can also update a state or make an API call here
   };
 

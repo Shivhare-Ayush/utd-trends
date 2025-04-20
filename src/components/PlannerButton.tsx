@@ -15,14 +15,14 @@ const PlannerButton: React.FC<PlannerButtonProps> = ({ addToPlanner, course }) =
 
   const handleAddToPlanner = () => {
     if (isChecked) {
-      alert(`${course.prefix} ${course.number} is already in your planner.`);
+      //alert(`${course.prefix} ${course.number} is already in your planner.`);
       setIsChecked(!isChecked) 
       return;
     }
     setIsChecked(!isChecked) 
     addToPlanner(course);
     
-    alert(`${course.prefix} ${course.number} has been added to your planner.`);
+    //alert(`${course.prefix} ${course.number} has been added to your planner.`);
   };
 
   return (
