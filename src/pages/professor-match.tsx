@@ -13,15 +13,54 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
+import type { GradesData } from '@/pages/api/grades';
+
+const letterGradeToScore: Record<string, number> = {
+  'A+': 13, 'A': 12, 'A-': 11, 'B+': 10, 'B': 9, 'B-': 8,
+  'C+': 7, 'C': 6, 'C-': 5, 'D+': 4, 'D': 3, 'D-': 2, 'F': 1
+};
+
+const scoreToLetterGrade = (score: number) => {
+  score = Math.ceil(score);
+  if (score >= 12.5) return 'A+';
+  if (score >= 11.5) return 'A';
+  if (score >= 10.5) return 'A-';
+  if (score >= 9.5) return 'B+';
+  if (score >= 8.5) return 'B';
+  if (score >= 7.5) return 'B-';
+  if (score >= 6.5) return 'C+';
+  if (score >= 5.5) return 'C';
+  if (score >= 4.5) return 'C-';
+  if (score >= 3.5) return 'D+';
+  if (score >= 2.5) return 'D';
+  if (score >= 1.5) return 'D-';
+  return 'F';
+};
+
+const averageLetterGrade = (gradeDistribution: number[]) => {
+  const weights = [13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+  let total = 0;
+  let count = 0;
+  for (let i = 0; i < 13; i++) {
+    total += gradeDistribution[i] * weights[i];
+    count += gradeDistribution[i];
+  }
+  
+  console.log('Aggregated Distribution:', gradeDistribution);
+  console.log('Total Score:', total);
+  console.log('Count:', count);
+  console.log('Average Score:', total / count);
+  return count === 0 ? 'N/A' : scoreToLetterGrade(total / count);
+};
 
 const ProfessorMatch: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [professors, setProfessors] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0); // Track the current card index
-  const [comments, setComments] = useState<any[]>([]); // Store fetched comments
-  const [loading, setLoading] = useState(false); // Loading state for the button
-  const [dialogOpen, setDialogOpen] = useState(false); // State for dialog
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [comments, setComments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfessorDetails = async () => {
@@ -34,11 +73,44 @@ const ProfessorMatch: React.FC = () => {
         const enriched = await Promise.all(
           parsed.map(async (prof: any) => {
             try {
+              // Extract first and last name
+              console.log('name', prof.name);
+              const nameParts = prof.name.trim().split(' ');
+              const profFirst = nameParts.slice(0, -1).join(' '); // All words except the last word
+              const profLast = nameParts[nameParts.length - 1]; // Last word
+
+              // Fetch professor details
               const res = await fetch(
-                `/api/professor?profFirst=${encodeURIComponent(prof.name.split(' ')[0])}&profLast=${encodeURIComponent(prof.name.split(' ').slice(1).join(' '))}`
+                `/api/professor?profFirst=${encodeURIComponent(profFirst)}&profLast=${encodeURIComponent(profLast)}`
               );
               const profData = await res.json();
               const profDetails = profData?.data ?? {};
+
+              // Extract course prefix and number
+              const prefix = prof.subject.split(' ')[0];
+              const number = prof.subject.split(' ')[1];
+
+              // Fetch grades for all semesters
+              const gradesRes = await fetch(
+                `/api/grades?profFirst=${encodeURIComponent(profFirst)}&profLast=${encodeURIComponent(profLast)}&prefix=${prefix}&number=${number}`
+              );
+              const gradesData = await gradesRes.json();
+              const allSemesters = gradesData.data || [];
+
+              // Aggregate grade distributions across all semesters
+              const aggregatedDistribution = Array(13).fill(0); // Initialize an array for grade distribution
+              allSemesters.forEach((semester: any) => {
+                const distribution = semester.grade_distribution || [];
+                for (let i = 0; i < distribution.length; i++) {
+                  aggregatedDistribution[i] += distribution[i];
+                }
+              });
+
+              // Compute the average letter grade
+              let computedLetterGrade = 'N/A';
+              if (aggregatedDistribution.some((count) => count > 0)) {
+                computedLetterGrade = averageLetterGrade(aggregatedDistribution);
+              }
 
               return {
                 ...prof,
@@ -49,7 +121,8 @@ const ProfessorMatch: React.FC = () => {
                 officeLink: profDetails.office?.map_uri || '',
                 profileLink: profDetails.profile_uri || '',
                 imageSrc: profDetails.image_uri || '/default.jpg',
-                ratings: profDetails.ratings?.edges || [], // Include ratings data
+                ratings: profDetails.ratings?.edges || [],
+                grade: computedLetterGrade,
               };
             } catch (error) {
               console.error('Error enriching professor:', error);

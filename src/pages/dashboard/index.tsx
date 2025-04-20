@@ -743,6 +743,7 @@ export const Dashboard: NextPage<Props> = (props: Props): React.ReactNode => {
           setResultsLoading={() => setResults({ state: 'loading' })}
           isPlanner={false}
           includedResults={includedResults}
+       
           rmp={props.rmp}
           />
         <main className="p-4">{contentComponent}</main>
