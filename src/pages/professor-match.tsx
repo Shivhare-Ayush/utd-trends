@@ -2,6 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import CustomNavbar from '../components/CustomNavbar';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import Checkbox from '@mui/material/Checkbox'; // Import Checkbox from Material-UI
+import BookOutlinedIcon from '@mui/icons-material/BookOutlined'; // Import BookOutlinedIcon
+import BookIcon from '@mui/icons-material/Book'; // Import BookIcon
 
 const ProfessorMatch: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -51,6 +54,19 @@ const ProfessorMatch: React.FC = () => {
     fetchProfessorDetails();
   }, [router.query.professors]);
 
+  function addToPlanner(professor: any) {
+    const planner = JSON.parse(localStorage.getItem('planner') || '[]');
+    const isAlreadyAdded = planner.some((item: any) => item.id === professor.id);
+
+    if (isAlreadyAdded) {
+      alert(`${professor.name} is already in your planner.`);
+    } else {
+      planner.push(professor);
+      localStorage.setItem('planner', JSON.stringify(planner));
+      alert(`${professor.name} has been added to your planner.`);
+    }
+  }
+
   return (
     <div
       className="h-screen w-screen bg-cover bg-center flex flex-col items-center justify-center p-7 pb-0 overflow-hidden"
@@ -74,7 +90,7 @@ const ProfessorMatch: React.FC = () => {
               <div className=" justify-between flex w-full mb-4">
               <button className="bg-red-500 rounded-sm w-6 h-8"/>
                 <Image
-                  src={professor.imageSrc}
+                  src={professor.imageSrc || '/default.jpg'}
                   alt={professor.name}
                   width={200}
                   height={200}
