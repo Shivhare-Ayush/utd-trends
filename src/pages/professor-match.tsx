@@ -13,6 +13,8 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
+import PlannerButton from '../components/PlannerButton';
+import type { SearchQuery } from '@/types/SearchQuery';
 
 const ProfessorMatch: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -65,21 +67,8 @@ const ProfessorMatch: React.FC = () => {
     };
 
     fetchProfessorDetails();
-  }, [router.query.professors]);
-
-  function addToPlanner(professor: any) {
-    const planner = JSON.parse(localStorage.getItem('planner') || '[]');
-    const isAlreadyAdded = planner.some((item: any) => item.id === professor.id);
-
-    if (isAlreadyAdded) {
-      alert(`${professor.name} is already in your planner.`);
-    } else {
-      planner.push(professor);
-      localStorage.setItem('planner', JSON.stringify(planner));
-      alert(`${professor.name} has been added to your planner.`);
-    }
-  }
-
+  }, 
+  [router.query.professors]);
   const fetchComments = async (professor: any) => {
     setLoading(true); // Show loading state
     try {
@@ -106,6 +95,12 @@ const ProfessorMatch: React.FC = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false); // Close the dialog
+  };
+
+  const addToPlanner = (professor: any) => {
+    // Logic to add the professor to the planner
+    console.log(`${professor.name} added to planner`);
+    // You can also update a state or make an API call here
   };
 
   // Handle scroll event to update the current index
@@ -174,19 +169,10 @@ const ProfessorMatch: React.FC = () => {
                   height={200}
                   className="rounded-2xl object-cover border-b-4 border-black border-2"
                 />
-                {/* Bookmark icon */}
-                <span>
-                  <Checkbox className="text-black mx-auto"
-                    checked={false}
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevents opening/closing the card when clicking on the compare checkbox
-                      addToPlanner(professor);
-                    }}
-                    icon={<BookOutlinedIcon sx={{ fontSize: '38px'}}/>}
-                    checkedIcon={<BookIcon sx={{ fontSize: '38px'}}/>}
-                    sx={{ '& .MuiSvgIcon-root': { fontSize: '38px' } }} // Adjust the overall size
+                <PlannerButton
+                  addToPlanner={addToPlanner}
+                  course={professor}
                   />
-                </span>
               </div>
 
               {/* Info block */}
